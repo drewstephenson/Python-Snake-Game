@@ -1,5 +1,5 @@
 # Python-Snake-Game
-This is a really simple snake game I made for fun, there are likely many bugs and ways it could be optimized better, but I'm just happy it works!
+This is a really simple snake game I made for fun, there are likely many bugs and ways it could be optimized better, but I'm just happy it works
 
 Here is how the game starts, you can move the snake with the arrow keys:
 
