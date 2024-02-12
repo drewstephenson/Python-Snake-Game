@@ -7,7 +7,7 @@ import random
 pygame.init()
 
 # sets display window bounds and title
-displayWindow_width = 1000
+displayWindow_width = 600
 displayWindow_height = 600
 displayWindow = pygame.display.set_mode((displayWindow_width, displayWindow_height))
 
@@ -33,8 +33,9 @@ snake_speed = 30    # vroom
 clock = pygame.time.Clock()     # creates a frame rate for game
 
 # message stuff
-font_style = pygame.font.SysFont(None, 50)       # Game over font --- None makes it the default font, size is 50
-score_font = pygame.font.SysFont(None, 35)       # Score font --- None makes it the default font, size is 35
+font_size = int(displayWindow_height / 12)
+font_style = pygame.font.SysFont(None, font_size)       # Game over font --- None makes it the default font, size adjusts to screen size
+score_font = pygame.font.SysFont(None, int(font_size * 0.7))      # Score font --- None makes it the default font, size adjusts to screen size
 
 # definitions of gameplay functions
 
@@ -43,8 +44,24 @@ def your_score(score):
     displayWindow.blit(value, [0, 0])
 
 def message(msg, color):     # renders the message
+    max_width = displayWindow_width * 0.8    # max width of the message is 80% of screen size
+    font_size = int(displayWindow_height / 12)
+    font_style = pygame.font.SysFont(None, font_size)
     mesg = font_style.render(msg, True, color)
-    displayWindow.blit(mesg, [displayWindow_width / 6, displayWindow_height / 3])
+    text_width = mesg.get_rect().width   # gets the width of the message
+
+    while text_width > max_width:   # while the width of the message is greater than the max width
+        font_size -= 1
+        font_style = pygame.font.SysFont(None, font_size)
+        mesg = font_style.render(msg, True, color)
+        text_width = mesg.get_rect().width
+
+    # centers the text
+    text_height = mesg.get_rect().height
+    text_x = (displayWindow_width - text_width) / 2
+    text_y = (displayWindow_height - text_height) / 2
+
+    displayWindow.blit(mesg, [text_x, text_y])
 
 def our_snake(snake_block, snake_list):  # puts the snake on the screen
     for x in snake_list:
@@ -76,46 +93,42 @@ def game_loop():    # main game loop
     foodx = round(random.randrange(0, displayWindow_width - snake_block) / 10.0) * 10.0
     foody = round(random.randrange(0, displayWindow_height - snake_block) / 10.0) * 10.0
 
-    last_key = None    # prevents snake from killing itself when you press the opposite direction
-
     frame_count = 0    # increments so snake cannot instantly die in first 5 frames
 
     # gameplay loop
     while not game_over:
+        input_taken = False      # one input per frame
 
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:   # makes the close button work, ends the game
                 game_over = True
 
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and not input_taken:
                 if (x1 != prev_x1 or y1 != prev_y1) and not tail_added:
                     for i in range(1, length_of_snake):
                         snake_list.insert(0, [x1 + i * snake_block, y1])
                 tail_added = True
 
-
-                if event.key == pygame.K_LEFT and last_key != pygame.K_RIGHT:    # applies values to add to current position based on direction you want to go
+                if event.key == pygame.K_LEFT and x1_change == 0:     # applies values to add to current position based on direction you want to go
                     direction_changes.append((-snake_block, 0))     # adds to the direction changes list
-                    last_key = event.key
 
-                elif event.key == pygame.K_RIGHT and last_key != pygame.K_LEFT:
+                elif event.key == pygame.K_RIGHT and x1_change == 0:
                     direction_changes.append((snake_block, 0))     # adds to the direction changes list
-                    last_key = event.key
 
-                elif event.key == pygame.K_UP and last_key != pygame.K_DOWN:
+                elif event.key == pygame.K_UP and y1_change == 0:
                     direction_changes.append((0, -snake_block))     # adds to the direction changes list
-                    last_key = event.key
 
-                elif event.key == pygame.K_DOWN and last_key != pygame.K_UP:
+                elif event.key == pygame.K_DOWN and y1_change == 0:
                     direction_changes.append((0, snake_block))     # adds to the direction changes list
-                    last_key = event.key
+
+                input_taken = True
 
             prev_x1 = x1
             prev_y1 = y1
 
             if direction_changes:
-                x1_change, y1_change = direction_changes.pop(0)     # pops the first element of the direction changes list to update the direction (get rid of if breaking)
+                x1_change, y1_change = direction_changes.pop()     # pops the first element of the direction changes list to update the direction (get rid of if breaking)
 
         if x1 + x1_change >= displayWindow_width or x1 + x1_change < 0 or y1 + y1_change >= displayWindow_height or y1 + y1_change < 0:
             game_close = True
@@ -153,6 +166,7 @@ def game_loop():    # main game loop
                     if event.key == pygame.K_q:  # if press Q, game closes
                         game_over = True
                         game_close = False
+
                     if event.key == pygame.K_c:   # if press C, game starts again
                         game_loop()
 
@@ -173,5 +187,8 @@ def game_loop():    # main game loop
     # ends the game, closes window
     pygame.quit()
     quit()
+
+game_loop()
+
 
 game_loop()
