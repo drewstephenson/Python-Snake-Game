@@ -1,0 +1,3 @@
+2/11/24
+  Finally fixed an issue where the snake would turn 180 degrees and instantly collide with itself which would end the game suddenly.
+  Made it so any message in the game would adjust to the size of the window if changed.
